@@ -1,5 +1,6 @@
 const usersRepository = require('./users-repository');
 const { hashPassword } = require('../../../utils/password');
+const { passwordMatched } = require('../../../utils/password');
 
 /**
  * Get list of users
@@ -121,6 +122,36 @@ async function emailCheck(email) {
   }
 }
 
+//Checking curr psw with psw in db
+async function checkCurrPsw(id, currpassword) {
+  const user = await usersRepository.getUser(id);
+
+  const userPassword = user ? user.password : '<RANDOM_PASSWORD_FILLER>';
+  const verifiedPsw = await passwordMatched(currpassword, userPassword);
+
+  if (user && verifiedPsw) {
+    return true;
+  }
+}
+
+//Patching / updating psw in db with new psw
+async function pswChange(id, password) {
+  const hashedPassword = await hashPassword(password);
+  const user = await usersRepository.getUser(id);
+
+  if (!user) {
+    return null;
+  }
+
+  try {
+    await usersRepository.changePsw(id, hashedPassword);
+  } catch (error) {
+    return null;
+  }
+
+  return true;
+}
+
 module.exports = {
   getUsers,
   getUser,
@@ -128,4 +159,6 @@ module.exports = {
   updateUser,
   deleteUser,
   emailCheck,
+  checkCurrPsw,
+  pswChange,
 };

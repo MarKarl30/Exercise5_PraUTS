@@ -138,10 +138,47 @@ async function deleteUser(request, response, next) {
   }
 }
 
+async function passwordChange(request, response, next) {
+  const id = request.params.id;
+  const curr_password = request.body.curr_password;
+  const new_password = request.body.new_password;
+  const verify_password = request.body.verify_password;
+
+  try {
+    const checkedCurrPsw = await usersService.checkCurrPsw(id, curr_password);
+    if (!checkedCurrPsw) {
+      throw errorResponder(
+        errorTypes.INVALID_PASSWORD,
+        'Current_password_invalid'
+      );
+    }
+
+    if (verify_password != new_password) {
+      throw errorResponder(
+        errorTypes.INVALID_PASSWORD,
+        'Confirmed_password_does_not_match'
+      );
+    }
+
+    const password = await new_password;
+    const success = await usersService.pswChange(id, password);
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Password change failed'
+      );
+    }
+    return response.status(200).json({ id });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUser,
   deleteUser,
+  passwordChange,
 };
