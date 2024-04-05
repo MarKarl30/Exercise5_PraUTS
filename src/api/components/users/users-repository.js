@@ -62,10 +62,21 @@ async function deleteUser(id) {
   return User.deleteOne({ _id: id });
 }
 
+async function checkEmailExist(email) {
+  try {
+    const user = await User.findOne({ email: email });
+    return !!user; // !! => To convert value to boolean
+  } catch (error) {
+    console.error('Error checking email existence:', error);
+    return false;
+  }
+}
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUser,
   deleteUser,
+  checkEmailExist,
 };

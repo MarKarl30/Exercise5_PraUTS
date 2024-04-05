@@ -107,10 +107,25 @@ async function deleteUser(id) {
   return true;
 }
 
+async function emailCheck(email) {
+  try {
+    const emailStatus = await usersRepository.checkEmailExist(email);
+    if (!emailStatus) {
+      return false;
+    } else {
+      return true;
+    }
+  } catch (error) {
+    console.error('Error checking email: ', error);
+    return false;
+  }
+}
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUser,
   deleteUser,
+  emailCheck,
 };
