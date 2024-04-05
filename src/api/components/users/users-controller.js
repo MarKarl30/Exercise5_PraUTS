@@ -49,14 +49,19 @@ async function createUser(request, response, next) {
   const name = request.body.name;
   const email = request.body.email;
   const password = request.body.password;
+  const verify_password = request.body.verify_password;
 
   try {
     const emailTakenErr = await usersService.emailCheck(email);
     if (emailTakenErr) {
       throw errorResponder(
         errorTypes.EMAIL_ALREADY_TAKEN,
-        'Email_Already_Taken'
+        'Email_already_taken'
       );
+    }
+
+    if (password != verify_password) {
+      throw errorResponder(errorTypes.INVALID_PASSWORD, 'Invalid password');
     }
 
     const success = await usersService.createUser(name, email, password);
